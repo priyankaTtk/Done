@@ -18,6 +18,10 @@ pipeline {
             }
         }
 
+        stage('Lint Code') {
+            steps {
+                sh 'npm run lint'
+            }
         }
 
         stage('Run Tests') {
