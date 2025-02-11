@@ -1,44 +1,54 @@
 pipeline {
     agent any
 
+    environment {
+        CI = 'true'
+    }
+
     stages {
-        stage('Clone Repository') {
+        stage('Checkout Code') {
             steps {
-                git 'https://github.com/priyankaTtk/Done.git'
+                git branch: 'main', url: 'https://github.com/priyankaTtk/Done.git'
             }
         }
+
         stage('Install Dependencies') {
             steps {
-                script {
-                    // Install Node.js dependencies
-                    sh 'npm install'
-                }
+                sh 'npm ci'
             }
         }
+
+        stage('Lint Code') {
+            steps {
+                sh 'npm run lint'
+            }
+        }
+
         stage('Run Tests') {
             steps {
-                script {
-                    // Run your tests
-                    sh 'npm test'
-                }
+                sh 'npm test -- --coverage'
             }
         }
-        stage('Build') {
+
+        stage('Build Application') {
             steps {
-                script {
-                    // Build the React app
-                    sh 'npm run build'
-                }
+                sh 'npm run build'
             }
         }
-        stage('Deploy') {
+
+        stage('Archive Build Artifacts') {
             steps {
-                script {
-                    // Deploy the app (this can vary based on your deployment method)
-                    // For example, you can use a simple command to copy files to a server
-                    sh 'scp -r build/* user@yourserver:/path/to/deploy'
-                }
+                archiveArtifacts artifacts: 'build/**', fingerprint: true
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline executed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Check errors in the logs.'
         }
     }
 }
