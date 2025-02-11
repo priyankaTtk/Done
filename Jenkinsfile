@@ -20,9 +20,17 @@ pipeline {
 
         stage('Lint Code') {
             steps {
-                sh 'npm run lint'
+                script {
+                    def lintScriptExists = sh(script: "npm run | grep lint", returnStatus: true) == 0
+                    if (lintScriptExists) {
+                        sh 'npm run lint'
+                    } else {
+                        echo 'Skipping lint: No lint script found in package.json'
+                    }
+                }
             }
         }
+
 
         stage('Run Tests') {
             steps {
